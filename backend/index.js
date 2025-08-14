@@ -1,39 +1,39 @@
-// fetchAndPush.js
-import axios from "axios";
-import cheerio from "cheerio";
+const axios = require("axios");
+const cheerio = require("cheerio");
+const express = require("express");
+const app = express();
 
-const URL = "https://udyamregistration.gov.in/UdyamRegistration.aspx";
-const API_ENDPOINT = "https://your-api-endpoint.com/saveFields"; 
+const url = "https://udyamregistration.gov.in/UdyamRegistration.aspx";
 
-async function fetchAndPush() {
+async function fetchData() {
   try {
-    const response = await axios.get(URL, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.5845.188 Safari/537.36",
-      },
-    });
+    const response = await axios.get(url);
+    const html = response.data;
+    const $ = cheerio.load(html);
 
-    const $ = cheerio.load(response.data);
     const inputs = [];
-
-    $("input").each((_, el) => {
+    $('input').each((_, el) => {
       inputs.push({
-        id: $(el).attr("id") || "",
-        name: $(el).attr("name") || "",
-        type: $(el).attr("type") || "",
-        maxlength: $(el).attr("maxlength") || "",
-        placeholder: $(el).attr("placeholder") || "",
+        name: $(el).attr('name') || '',
+        type: $(el).attr('type') || '',
+        maxlength: $(el).attr('maxlength') || '',
+        id: $(el).attr('id') || '',
+        placeholder: $(el).attr('placeholder') || ''
       });
     });
 
-    // Send to your API / database
-    const res = await axios.post(API_ENDPOINT, { inputFields: inputs });
-    console.log("Data saved:", res.data);
+    return inputs;
   } catch (err) {
-    console.error("Error:", err.message);
+    console.error("Error fetching:", err);
+    return [];
   }
 }
 
-// Run the function
-fetchAndPush();
+app.get("/api/scrape-udyam-data-123", async (req, res) => {
+  const data = await fetchData();
+  res.json({ input: data });
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Server running");
+});
