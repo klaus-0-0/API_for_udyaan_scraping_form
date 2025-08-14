@@ -1,10 +1,12 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const express = require("express");
+const cors = require("cors")
 const app = express();
 
 const URL = "https://udyamregistration.gov.in/UdyamRegistration.aspx";
 
+app.use(cors());
 // Function to fetch and parse data
 async function fetchData() {
   try {
