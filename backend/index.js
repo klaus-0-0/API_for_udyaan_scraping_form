@@ -3,11 +3,14 @@ const cheerio = require("cheerio");
 const express = require("express");
 const app = express();
 
-const url = "https://udyamregistration.gov.in/UdyamRegistration.aspx";
+const URL = "https://udyamregistration.gov.in/UdyamRegistration.aspx";
 
+// Function to fetch and parse data
 async function fetchData() {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(URL, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
+    });
     const html = response.data;
     const $ = cheerio.load(html);
 
@@ -24,16 +27,16 @@ async function fetchData() {
 
     return inputs;
   } catch (err) {
-    console.error("Error fetching:", err);
+    console.error("Error fetching data:", err);
     return [];
   }
 }
 
+// Express API route
 app.get("/api/scrape-udyam-data-123", async (req, res) => {
   const data = await fetchData();
-  res.json({ input: data });
+  res.json({ input: data }); // sends JSON data to frontend
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Server running");
-});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
